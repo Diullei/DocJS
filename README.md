@@ -29,7 +29,7 @@ Basic example:
 
 [Try on jsfiddle](http://jsfiddle.net/Diullei/cNdrz/)
 
-![Valid XHTML](https://raw.github.com/Diullei/DocJS/master/basic_example.png)
+![Valid XHTML](https://raw.github.com/Diullei/DocJS/master/basic_example.png) 
 
 ##Todo
 
