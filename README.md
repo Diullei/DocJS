@@ -27,7 +27,7 @@ Basic example:
 </html>
 ```
 
-<iframe style="width: 100%; height: 300px" src="http://jsfiddle.net/Diullei/cNdrz/embedded/" allowfullscreen="allowfullscreen" frameborder="0"></iframe>
+[Try on jsfiddle](http://jsfiddle.net/Diullei/cNdrz/)
 
 ##Todo
 
