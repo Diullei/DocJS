@@ -1,0 +1,23 @@
+<!DOCTYPE HTML>
+<html lang="en-US">
+<head>
+	<meta charset="UTF-8">
+	<title>$docJS - Example</title>
+</head>
+<body>
+	
+	<input type="text" name="" id="txt" />
+	<div id="lbl1"></div>
+	<div id="lbl2"></div>
+	<div id="lbl3">Hello {{= value }}!</div>	
+	
+	<script type="text/javascript" src="docjs.js"></script>
+	<script type="text/javascript">
+	
+		$doc.id('lbl1').bind($doc.id('txt'));
+		$doc.id('lbl2').bind($doc.id('txt'), 'Hello {{= value }}!');
+		$doc.id('lbl3').bindTmpl($doc.id('txt'));
+		
+	</script>
+</body>
+</html>
