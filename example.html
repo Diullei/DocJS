@@ -10,6 +10,9 @@
 	<div id="lbl1"></div>
 	<div id="lbl2"></div>
 	<div id="lbl3">Hello {{= value }}!</div>	
+
+	<div id="lbl4"></div>
+	<div id="lbl5"></div>
 	
 	<script type="text/javascript" src="docjs.js"></script>
 	<script type="text/javascript">
@@ -17,6 +20,23 @@
 		$doc.id('lbl1').bind($doc.id('txt'));
 		$doc.id('lbl2').bind($doc.id('txt'), 'Hello {{= value }}!');
 		$doc.id('lbl3').bindTmpl($doc.id('txt'));
+		
+		function Model(){
+			this.name = '';
+		}
+		
+		var model = new Model();
+		
+		$doc.id('lbl4').bind(model);
+		
+		model.set('name', 'Name 1');
+		model.set('name', 'Name 2');
+		
+		var model2 = new Model();
+		
+		$doc.id('lbl5').bind(model2, 'value: {{= name }}');
+		
+		model2.set('name', 'Name 3');
 		
 	</script>
 </body>

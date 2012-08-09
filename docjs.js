@@ -9,8 +9,8 @@
 	// based on John Resig - Simple JavaScript Templating - http://ejohn.org/
 	//-----------------------------------------------------------------------
 	var tmplCache = {};
-	exports.tmplate = function tmpl(str, data){
-		var fn = !/\W/.test(str) ? tmplCache[str] = tmplCache[str] || tmpl(str) :
+	$doc.tmplate = function(str, data){
+		var fn = !/\W/.test(str) ? tmplCache[str] = tmplCache[str] || $doc.tmplate(str) :
 			new Function("obj", "var p=[],print=function(){p.push.apply(p,arguments);};with(obj){p.push('" +
 				str.replace(/[\r\t\n]/g, " ")
 					.split("{{").join("\t")
@@ -34,6 +34,12 @@
 		},
 		isStr: function(str){
 			return typeof str === 'string';
+		},
+		isEl: function(o){
+			return (
+				typeof HTMLElement === "object" ? o instanceof HTMLElement : //DOM2
+				o && typeof o === "object" && o.nodeType === 1 && typeof o.nodeName==="string"
+			);
 		}
 	};
 		
@@ -109,7 +115,6 @@
 		return function(){
 			var sign = '';
 			for(var i=0; i<arguments.length; i++) { sign += (sign == ''? '' : '_') + typeof arguments[i]; }
-			console.log(sign);
 			return overloads[sign] ? overloads[sign].apply(this, arguments) : null;
 		}
 	})();
@@ -121,31 +126,41 @@
 			
 		return {
 			el: el,
-			bind: function(target, tmpl){
+			bind: function(target, template){
 				target = target.el || target;
-				var subject = {};
-				$doc.bind(subject, function(obj, val){ 
-					el.innerHTML = val; 
-				});
-			
-				var update = function(){
-					subject.set('text', tmpl != null ? tmplate(tmpl, target) : target.value);
-				};
 				
-				update();
+				if($doc.util.isEl(target)){
+					var elTarget = {};
+					$doc.bind(elTarget, function(obj, val){ 
+						el.innerHTML = val; 
+					});
 				
-				target.addEventListener("keyup", update);
-				target.addEventListener("keydown", update);
-				target.addEventListener("keypress", update);
+					var update = function(){
+						elTarget.set('text', template != null && template.trim() != '' ? $doc.tmplate(template, target) : target.value);
+					};
+					
+					update();
+				
+					target.addEventListener("keyup", update);
+					target.addEventListener("keydown", update);
+					target.addEventListener("keypress", update);
+				} else {
+					$doc.bind(target, function(obj, val){ 
+						el.innerHTML = template != null && template.trim() != '' ? $doc.tmplate(template, target) : val; 
+					});
+				}
 				
 				return this;
 			},
 			
 			bindTmpl: function(target){
-				var tmpl = el.value ? el.value : el.innerHTML;
+				if(!$doc.util.isEl(target.el || target)){
+					throw new Error('Invalid target argument');
+				}
+				var template = el.value ? el.value : el.innerHTML;
 				el.value = el.innerHTML = '';
 				
-				this.bind.call(this, target, tmpl);
+				this.bind.call(this, target, template);
 				
 				return this;
 			}
