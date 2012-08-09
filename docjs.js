@@ -62,67 +62,58 @@
 	
 	// Bind
 	//-----
-    $doc.bind = function(){
-        var subject = arguments[0];
-        var observer = {};
-        var prop = null;
-        var func = function(){};
+	$doc.bind = (function(){
+		var overloads = {};
 
-		// discover overload function
-		
-		// bind(Subject, Property...
-        if(this.util.isStr(arguments[1])){
-            prop = arguments[1];
+		var _bind = function(subject, property, observer, func){
+			subject = this.proxy(subject);
+			subject._wasBound = true;
 			
-			// bind(Subject, Property, Observer)
-            if(this.util.isObj(arguments[2])){
-                observer = arguments[2];
-                func = arguments[3];
-				
-			// bind(Subject, Property, Function)
-            } else {
-                func = arguments[2];
-            }
-			
-		// bind(Subject, Function)
-        } else if(this.util.isFn(arguments[1])){
-            func = arguments[1];
-			
-		// bind(Subject, Observer, Function)
-        } else if(this.util.isObj(arguments[1])){
-            observer = arguments[1];
-            func = arguments[2];
-        }
-
-        if(!this.util.isObj(subject)){
-            throw new Error("first argument must be object");
-        }
-			
-        subject = this.proxy(subject);
-		
-		// used to verify if Subject 
-        subject._wasBound = true;
-
-		// notify observers bound to properties
-        if(prop != null){
-            if(!subject.observers[prop])
-                subject.observers[prop] = [];
-            subject.observers[prop].push(function() { 
-                return function(obj, val, prop) { 
-                    func.call(observer, obj, val, prop);
-                }
-            });
-		
-		// notify observers bound to object
-        } else {
-            subject.observers.all.push(function() { 
-                return function(obj, val, prop) { 
-                    func.call(observer, obj, val, prop);
-                }
-            });
+			if(property){
+				if(!subject.observers[property])
+					subject.observers[property] = [];
+				subject.observers[property].push(function() { 
+					return function(obj, value, property) { 
+						func.call(observer, obj, value, property);
+					}
+				});
+			}else{
+				subject.observers.all.push(function() { 
+					return function(obj, val, prop) { 
+						func.call(observer, obj, val, prop);
+					}
+				});
+			}
 		}
-    }
-	
+
+		overloads['object_string_object_function'] = function(subject, property, observer, func){
+			_bind.call(this, subject, property, observer, func)
+		}
+		
+		overloads['object_string_object'] = function(subject, property, observer){
+			_bind.call(this, subject, property, observer, function(){})
+		}
+
+		overloads['object_string_function'] = function(subject, property, func){
+			_bind.call(this, subject, property, {}, func)
+		}
+
+		overloads['object_object_function'] = function(subject, observer, func){
+			_bind.call(this, subject, '', observer, func)
+		}
+
+		overloads['object_function'] = function(subject, func){
+			_bind.call(this, subject, '', {}, func)
+		}
+		
+        return function(){
+			var sign = '';
+			for(var i=0; i<arguments.length; i++) { sign += (sign == ''? '' : '_') + typeof arguments[i]; }
+			console.log(sign);
+            return overloads[sign] ? overloads[sign].apply(this, arguments) : null;
+        }
+	})();
+		
 	// Querying
 	//---------
     $doc.id = function(id){

@@ -28,13 +28,10 @@ test('create proxy', function(){
 test('bind', function(){
     
     var obj = {};
-    $doc.bind(obj);
+    $doc.bind(obj, function(){});
     ok(obj._isProxy, 'when binded as subject obj must be a proxy');
     ok(obj._wasBound, 'when binded as subject obj must have _wasBound property set as true');
-    raises(function() { $doc.bind(''); }, 
-        verifyThrow("first argument must be object"),
-        "first argument must be object");
-    
+
     var obj1 = {};
     var val = false;
     $doc.bind(obj1, function(){ val = true; });
