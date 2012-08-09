@@ -25,40 +25,40 @@
 	
 	// Util
 	//-----
-    $doc.util = {
-        isFn: function(f){
-            return typeof f === 'function';
-        },
-        isObj: function(o){
-            return typeof o === 'object';
-        },
-        isStr: function(str){
-            return typeof str === 'string';
-        }
-    };
+	$doc.util = {
+		isFn: function(f){
+			return typeof f === 'function';
+		},
+		isObj: function(o){
+			return typeof o === 'object';
+		},
+		isStr: function(str){
+			return typeof str === 'string';
+		}
+	};
 		
 	// Subject proxy
 	//--------------
-    $doc.proxy = function(obj){
-        obj.get = function(prop){
-            return obj[prop];
-        }
-        obj.set = function(prop, val){
-            obj[prop] = val;
-            for(var i = 0; i< obj.observers.all.length; i++){
-                this.observers.all[i]()(obj, obj[prop], prop);
-            }
-            if(obj.observers[prop]) {
-                for(var i = 0; i< obj.observers[prop].length; i++){
-                    this.observers[prop][i]()(obj, obj[prop], prop);
-                }
-            }
-        }
-        obj.observers = {all: []};
-        obj._isProxy = true;
-    
-        return obj;
-    }
+	$doc.proxy = function(obj){
+		obj.get = function(prop){
+			return obj[prop];
+		}
+		obj.set = function(prop, val){
+			obj[prop] = val;
+			for(var i = 0; i< obj.observers.all.length; i++){
+				this.observers.all[i]()(obj, obj[prop], prop);
+			}
+			if(obj.observers[prop]) {
+				for(var i = 0; i< obj.observers[prop].length; i++){
+					this.observers[prop][i]()(obj, obj[prop], prop);
+				}
+			}
+		}
+		obj.observers = {all: []};
+		obj._isProxy = true;
+	
+		return obj;
+	}
 	
 	// Bind
 	//-----
@@ -106,22 +106,22 @@
 			_bind.call(this, subject, '', {}, func)
 		}
 		
-        return function(){
+		return function(){
 			var sign = '';
 			for(var i=0; i<arguments.length; i++) { sign += (sign == ''? '' : '_') + typeof arguments[i]; }
 			console.log(sign);
-            return overloads[sign] ? overloads[sign].apply(this, arguments) : null;
-        }
+			return overloads[sign] ? overloads[sign].apply(this, arguments) : null;
+		}
 	})();
 		
 	// Querying
 	//---------
-    $doc.id = function(id){
-        var el = document.getElementById(id);
-        	
-        return {
-            el: el,
-            bind: function(target, tmpl){
+	$doc.id = function(id){
+		var el = document.getElementById(id);
+			
+		return {
+			el: el,
+			bind: function(target, tmpl){
 				target = target.el || target;
 				var subject = {};
 				$doc.bind(subject, function(obj, val){ 
@@ -149,8 +149,8 @@
 				
 				return this;
 			}
-        }
-    }
+		}
+	}
 	
-    exports.$doc = $doc;	
+	exports.$doc = $doc;	
 })(window);
