@@ -47,12 +47,12 @@ test('bind', function(){
     ok(val2, 'when bind a function to a property and set any value the function must be trigged');
 
     var obj3 = {cont: 1};
-    $doc.bind(obj3, obj3, function(){ this.cont++; });
+    $doc.bind(obj3, function(){ this.cont++; }, obj3);
     obj3.set('prop1', 1);
     equal(obj3.cont, 2, 'context object');
 
     var obj4 = {cont: 1};
-    $doc.bind(obj4, 'prop1', obj4, function(){ this.cont++; });
+    $doc.bind(obj4, 'prop1', function(){ this.cont++; }, obj4);
     obj4.set('prop1', 1);
     equal(obj4.cont, 2, 'context object 2');
 });

@@ -6,13 +6,29 @@
 </head>
 <body>
 	
-	<input type="text" name="" id="txt" />
-	<div id="lbl1"></div>
-	<div id="lbl2"></div>
-	<div id="lbl3">Hello {{= value }}!</div>	
+	<fieldset>
+		<input type="text" name="" id="txt" />
+		<div id="lbl1"></div>
+		<div id="lbl2"></div>
+		<div id="lbl3">Hello {{= value }}!</div>
+	</fieldset>
+	
+	<fieldset>
+		<div id="lbl4"></div>
+		<div id="lbl5"></div>
+	</fieldset>
 
-	<div id="lbl4"></div>
-	<div id="lbl5"></div>
+	<fieldset>
+		<input type="text" name="" id="txt2" />
+		<input type="text" name="" id="txt3" />
+		<div id="lbl6"></div>
+	</fieldset>
+	
+	<fieldset>
+		<p>First name: <input id="firstName" /></p>
+		<p>Last name: <input id="lastName" /></p>
+		<h2>Hello, <span id="fullName"></span>!</h2>
+	</fieldset>
 	
 	<script type="text/javascript" src="docjs.js"></script>
 	<script type="text/javascript">
@@ -30,13 +46,52 @@
 		$doc.id('lbl4').bind(model);
 		
 		model.set('name', 'Name 1');
-		model.set('name', 'Name 2');
+		model.set('name1', 'Name 2');
 		
 		var model2 = new Model();
 		
 		$doc.id('lbl5').bind(model2, 'value: {{= name }}');
 		
 		model2.set('name', 'Name 3');
+
+		var model3 = new Model();
+		
+		$doc.bind(model3, function(obj, val){
+			this.el.value = val;
+		}, $doc.id('txt3'));
+
+		$doc.bind($doc.id('txt2'), function(obj, val){
+			this.set('name', val);
+		}, model3);
+
+		//$doc.id('txt2').bind(model3, 'value: {{= name }}');
+		//$doc.id('txt2').bind(model3);
+		model3.set('name', 'teste');
+		
+		var viewModel = {
+			firstName: '',
+			lastName: '',
+			fullName: ''
+		}
+		
+		$doc.bind(viewModel, 'firstName,lastName', function (obj, val){
+			this.set('fullName', obj.firstName + " " + obj.lastName);
+		}, viewModel);
+
+		$doc.bind(viewModel, 'fullName', function(obj, val){
+			this.el.innerHTML = obj.fullName;
+		}, $doc.id('fullName'));
+
+		//viewModel.set('firstName', 'Planet');
+		//viewModel.set('lastName', 'Earth');
+		
+		$doc.bind($doc.id('firstName'), function(obj, val){
+			this.set('firstName', val);
+		}, viewModel);
+
+		$doc.bind($doc.id('lastName'), function(obj, val){
+			this.set('lastName', val);
+		}, viewModel);
 		
 	</script>
 </body>

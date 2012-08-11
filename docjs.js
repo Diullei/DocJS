@@ -35,6 +35,14 @@
 		isStr: function(str){
 			return typeof str === 'string';
 		},
+		isArray: function(arr){
+			try{
+				return arr instanceof Array;
+			}
+			catch(err){
+				return false;
+			}
+		},
 		isEl: function(o){
 			return (
 				typeof HTMLElement === "object" ? o instanceof HTMLElement : //DOM2
@@ -46,6 +54,10 @@
 	// Subject proxy
 	//--------------
 	$doc.proxy = function(obj){
+		if($doc.util.isEl(obj)){
+			obj = {el: obj};
+		}
+		
 		obj.get = function(prop){
 			return obj[prop];
 		}
@@ -62,7 +74,20 @@
 		}
 		obj.observers = {all: []};
 		obj._isProxy = true;
-	
+
+		if(obj.el){
+			var update = function(){
+				obj.set('text', obj.el.value || obj.el.innerHTML);
+				//var t = obj.el.value || obj.el.innerHTML;
+			};
+			
+			update();
+		
+			obj.el.addEventListener("keyup", update);
+			obj.el.addEventListener("keydown", update);
+			obj.el.addEventListener("keypress", update);
+		}
+		
 		return obj;
 	}
 	
@@ -71,45 +96,61 @@
 	$doc.bind = (function(){
 		var overloads = {};
 
-		var _bind = function(subject, property, observer, func){
-			subject = this.proxy(subject);
-			subject._wasBound = true;
+		var _bind = function(subject, property, func, observer){		
+			if(!subject._wasBound) {
+				subject = this.proxy(subject);
+				subject._wasBound = true;
+			}
 			
 			if(property){
-				if(!subject.observers[property])
-					subject.observers[property] = [];
-				subject.observers[property].push(function() { 
-					return function(obj, value, property) { 
-						func.call(observer, obj, value, property);
-					}
-				});
+				var list = property.split(',');
+				for(var i=0;i<list.length;i++) {
+					var prop = list[i];
+					if(!subject.observers[prop])
+						subject.observers[prop] = [];
+					subject.observers[prop].push(function() { 
+						return function(obj, value, property) { 
+							func.call(observer, obj, value, property);
+						}
+					});
+				}
 			}else{
-				subject.observers.all.push(function() { 
-					return function(obj, val, prop) { 
-						func.call(observer, obj, val, prop);
+				if(!$doc.util.isArray(subject)) {
+					subject.observers.all.push(function() { 
+						return function(obj, val, prop) { 
+							func.call(observer, obj, val, prop);
+						}
+					});
+				} else {
+					for(var i=0; i<subject.length;i++){
+						subject[i].observers.all.push(function() { 
+							return function(obj, val, prop) { 
+								func.call(observer, obj, val, prop);
+							}
+						});
 					}
-				});
+				}
 			}
 		}
 
-		overloads['object_string_object_function'] = function(subject, property, observer, func){
-			_bind.call(this, subject, property, observer, func)
+		overloads['object_string_function_object'] = function(subject, property, func, observer){
+			_bind.call(this, subject, property, func, observer)
 		}
 		
 		overloads['object_string_object'] = function(subject, property, observer){
-			_bind.call(this, subject, property, observer, function(){})
+			_bind.call(this, subject, property, function(){}, observer)
 		}
 
 		overloads['object_string_function'] = function(subject, property, func){
-			_bind.call(this, subject, property, {}, func)
+			_bind.call(this, subject, property, func, {})
 		}
 
-		overloads['object_object_function'] = function(subject, observer, func){
-			_bind.call(this, subject, '', observer, func)
+		overloads['object_function_object'] = function(subject, func, observer){
+			_bind.call(this, subject, '', func, observer)
 		}
 
 		overloads['object_function'] = function(subject, func){
-			_bind.call(this, subject, '', {}, func)
+			_bind.call(this, subject, '', func, {})
 		}
 		
 		return function(){
@@ -136,7 +177,13 @@
 					});
 				
 					var update = function(){
-						elTarget.set('text', template != null && template.trim() != '' ? $doc.tmplate(template, target) : target.value);
+						var content = target.value;
+						if(template != null) {
+							content = template;
+							if(template.indexOf('{{') != -1)
+								content = template.trim() != '' ? $doc.tmplate(template, target) : target.value;
+						}
+						elTarget.set('text', content);
 					};
 					
 					update();
@@ -146,7 +193,14 @@
 					target.addEventListener("keypress", update);
 				} else {
 					$doc.bind(target, function(obj, val){ 
-						el.innerHTML = template != null && template.trim() != '' ? $doc.tmplate(template, target) : val; 
+						var content = val;
+						if(template != null) {
+							content = template;
+							if(template.indexOf('{{') != -1)
+								content = template.trim() != '' ? $doc.tmplate(template, target) : val;
+						}
+						el.innerHTML = content;
+						el.value = content;
 					});
 				}
 				
@@ -167,5 +221,5 @@
 		}
 	}
 	
-	exports.$doc = $doc;	
+	exports.$doc = $doc;
 })(window);
