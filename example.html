@@ -69,17 +69,16 @@
 		model3.set('name', 'teste');
 		
 		var viewModel = {
-			firstName: '',
-			lastName: '',
-			fullName: ''
+			firstName: 'Planet',
+			lastName: 'Earth'
 		}
 		
-		$doc.bind(viewModel, 'firstName,lastName', function (obj, val){
-			this.set('fullName', obj.firstName + " " + obj.lastName);
-		}, viewModel);
+		//$doc.bind(viewModel, 'firstName,lastName', function (obj, val){
+		//	this.set('fullName', obj.firstName + " " + obj.lastName);
+		//}, viewModel);
 
-		$doc.bind(viewModel, 'fullName', function(obj, val){
-			this.el.innerHTML = obj.fullName;
+		$doc.bind(viewModel, 'firstName,lastName', function(obj, val){
+			this.el.innerHTML = obj.firstName + " " + obj.lastName;
 		}, $doc.id('fullName'));
 
 		//viewModel.set('firstName', 'Planet');
